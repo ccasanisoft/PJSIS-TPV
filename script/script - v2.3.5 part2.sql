@@ -1,0 +1,1 @@
+UPDATE `tec_settings` SET `version` = '2.3.6' WHERE `tec_settings`.`setting_id` = 1;
