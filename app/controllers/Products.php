@@ -13,6 +13,7 @@ class Products extends MY_Controller
 
         $this->load->library('form_validation');
         $this->load->model('products_model');
+        $this->load->model('warehouses_model');
 
     }
 
@@ -321,12 +322,14 @@ class Products extends MY_Controller
             $this->session->set_flashdata('error', lang('access_denied'));
             redirect('pos');
         }
+
         $this->data['categoriesOrdered'] = $this->site->getAllCategoriesOrdered();
         $this->data['mkrs'] = $this->site->getAllMakers();
-        //**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
+         $this->data['almacenes'] = $this->warehouses_model->getWarehouses();
+		//**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
         $this->form_validation->set_rules('code', lang("product_code"), 'trim|min_length[2]|max_length[50]|required|alpha_numeric');
-        //$this->form_validation->set_rules('code', lang("product_code"), 'trim|is_unique[products.code]|min_length[2]|max_length[50]|required|alpha_numeric');
-        //**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
+		//$this->form_validation->set_rules('code', lang("product_code"), 'trim|is_unique[products.code]|min_length[2]|max_length[50]|required|alpha_numeric');
+		//**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
         $this->form_validation->set_rules('name', lang("product_name"), 'required');
         $this->form_validation->set_rules('category', lang("category"), 'required');
         $this->form_validation->set_rules('price', lang("product_price"), 'required|is_numeric');
@@ -359,6 +362,9 @@ class Products extends MY_Controller
                 'fCrea' => date("Y-m-d H:i:s"),
                 'estado' => 1
                 );
+
+
+              
 
             if ($this->input->post('type') == 'combo') {
                 $c = sizeof($_POST['combo_item_code']) - 1;
@@ -416,28 +422,45 @@ class Products extends MY_Controller
             // $this->tec->print_arrays($data, $items);
         }
         
-        if($this->products_model->validate_products($this->input->post('code'))==false){
+		
+		if($this->products_model->validate_products($this->input->post('code'))==false){
+    
+			if ($this->form_validation->run() == true && $this->products_model->addProduct($data, $items)) {
 
-            if ($this->form_validation->run() == true && $this->products_model->addProduct($data, $items)) {
 
-                $this->session->set_flashdata('message', lang("product_added"));
-                redirect('products');
+                 $rs = $this->products_model->ultimoregistroProducts();
+                 /*$this->input->post("almacen")*/
+                 foreach ($rs as $a) {
+                     var_dump($a->id);
+                 }
+                  $datastock = array(
+                  'warehouse_id'=>$this->input->post("almacen"),
+                  'product_id'=>$a->id,
+                  'stock'=>$this->input->post("stock")
+                  );
+                 $this->warehouses_model->add_stock($datastock);
+                /*add stock*/
+               
 
-            } else {
 
-                $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-                $this->data['categories'] = $this->site->getAllCategories();
-                $this->data['page_title'] = lang('add_product');
-                $bc = array(array('link' => site_url('products'), 'page' => lang('products')), array('link' => '#', 'page' => lang('add_product')));
-                $meta = array('page_title' => lang('add_product'), 'bc' => $bc);
-                $this->page_construct('products/add', $this->data, $meta);
+				$this->session->set_flashdata('message', lang("product_added"));
+				redirect('products');
 
-            }
-            
-        }else{
-            $this->session->set_flashdata('error', lang("error_code_product"));
+			} else {
+
+				$this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+				$this->data['categories'] = $this->site->getAllCategories();
+				$this->data['page_title'] = lang('add_product');
+				$bc = array(array('link' => site_url('products'), 'page' => lang('products')), array('link' => '#', 'page' => lang('add_product')));
+				$meta = array('page_title' => lang('add_product'), 'bc' => $bc);
+				$this->page_construct('products/add', $this->data, $meta);
+
+			}
+			
+		}else{
+			$this->session->set_flashdata('error', lang("error_code_product"));
             redirect("products/add");
-        }
+		}
     }
 
     function edit($id = NULL) {
@@ -843,6 +866,6 @@ class Products extends MY_Controller
 
     }
 
-    
-    }
+	
+	}
     

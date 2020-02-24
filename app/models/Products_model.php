@@ -154,20 +154,36 @@ class Products_model extends CI_Model
         return FALSE;
     }
 
-    //**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
-    public function validate_products($code){
-        
-        $this->db->where("code",$code);
-        $this->db->where("estado",1);
-        //$this->db->limit(1);
-        $q = $this->db->get('products');
-        
-        //$q = $this->db->get_where('products', array('code' => $code, 'estado' => 1), 1);
+	//**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
+	public function validate_products($code){
+		
+		$this->db->where("code",$code);
+		$this->db->where("estado",1);
+		//$this->db->limit(1);
+		$q = $this->db->get('products');
+		
+		//$q = $this->db->get_where('products', array('code' => $code, 'estado' => 1), 1);
         if ($q->num_rows() > 0) {
             //return $q->row();
-            return TRUE;
+			return TRUE;
+        }
+        return FALSE;
+	}
+	//**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
+   
+
+    public function ultimoregistroProducts(){
+       $this->db->where("estado",1);
+       $this->db->limit(1);
+       $this->db->order_by("id", "desc");
+      
+        $q = $this->db->get('products');
+         if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
         }
         return FALSE;
     }
-    //**************************TRJ047 - ALEXANDER ROCA - 08/07/2019***************
 }
