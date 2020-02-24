@@ -43,7 +43,7 @@
         <div class="login-logo">
           <a href="<?=base_url();?>"><?= $Settings->site_name == 'PDV' ? '<b>PDV</b>' : '<img width="100%" src="'.base_url('uploads/ccasanisoft.png').'" alt="'.$Settings->site_name.'" />'; ?>
             <h3>SISTEMA DE GESTION<br></h3>
-            <h4>(Ventas, Compras y Almacén)</h4>
+            <h4>(Facturación, Compras y Almacén)</h4>
           </a>
         </div>
         <div class="login-box-body">
