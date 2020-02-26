@@ -34,32 +34,34 @@ class Products extends MY_Controller
 
 
         $this->load->library('datatables');
-        if($idAlmacen==0){
-            if ($this->Admin) {
-                $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type, ".$this->db->dbprefix('categories').".name as cname, COALESCE(SUM(stock),0) as stock, tax_method, currency, cost, price, barcode_symbology", false);
-            } else {
-                $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type, ".$this->db->dbprefix('categories').".name as cname, SUM(stock) as stock, tax_method, currency, price, barcode_symbology", false);
-            }
-
-            $this->datatables->join('categories', 'categories.id=products.category_id' , 'left')//************TRJ036 - ALEXANDER ROCA - 26/04/2019************
-            ->from('products')
-            ->join('tec_warehouse_stock', 'tec_warehouse_stock.product_id=products.id' , 'left')
-            ->where('products.estado =', 1)
-            ->group_by('products.id');
+        
+       if($idAlmacen==0){
+        if($this->Admin){
+         $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type,".$this->db->dbprefix('categories').".name as cname, stock, tax_method, currency, cost, price, barcode_symbology", false);  
+          }else{
+      $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type,".$this->db->dbprefix('categories').".name as cname, stock, tax_method, currency, price, barcode_symbology", false); 
+         }
+         $this->datatables->join("categories","categories.id=products.category_id");
+         $this->datatables->from('products');
+         $this->datatables->join("tec_warehouse_stock","tec_warehouse_stock.product_id=products.id");
+         $this->datatables->where('products.estado =', 1);
+         /*$this->datatables->group_by('products.id');*/
+       }else{
+        if($this->Admin){
+         $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type,".$this->db->dbprefix('categories').".name as cname, stock, tax_method, currency, cost, price, barcode_symbology", false);
+     
         }else{
-            if ($this->Admin) {
-                $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type, ".$this->db->dbprefix('categories').".name as cname, stock, tax_method, currency, cost, price, barcode_symbology", false);
-            } else {
-                $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type, ".$this->db->dbprefix('categories').".name as cname, stock, tax_method, currency, price, barcode_symbology", false);
-            }
+            $this->datatables->select($this->db->dbprefix('products').".id as pid, ".$this->db->dbprefix('products').".image as image, ".$this->db->dbprefix('products').".code as code, ".$this->db->dbprefix('products').".name as pname, type,".$this->db->dbprefix('categories').".name as cname, stock, tax_method, currency, price, barcode_symbology", false); 
 
-            $this->datatables->join('categories', 'categories.id=products.category_id')
-            ->from('products')
-            ->join('tec_warehouse_stock', 'tec_warehouse_stock.product_id=products.id AND warehouse_id='.$idAlmacen, 'right') //, 'left'
-            //->where('warehouse_id', $idAlmacen)
-            ->where('products.estado =', 1)
-            ->group_by('products.id');
         }
+          $this->datatables->join("categories","categories.id=products.category_id");
+         $this->datatables->from('products');
+         $this->datatables->join("tec_warehouse_stock","tec_warehouse_stock.product_id=products.id");
+         $this->datatables->where('products.estado =', 1);
+         $this->datatables->where('tec_warehouse_stock.warehouse_id =', $idAlmacen);
+       /*  $this->datatables->group_by('products.id');*/
+
+       }
 
         //$this->datatables->order_by('quantity','DESC');
 
